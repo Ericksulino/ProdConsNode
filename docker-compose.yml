@@ -1,0 +1,59 @@
+version: "3"
+
+services:
+  producer:
+    build: ./producer
+    container_name: producer
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - 3001:3000
+    volumes:
+      - ./producer:/home/node/producer
+    depends_on: 
+      - rabbitmq
+    command: >
+      bash -c "cd /home/node/producer && npm install && npm run start"
+
+  consumer:
+    build: ./consumer
+    container_name: consumer
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    ports:
+      - 3000:3000
+    volumes:
+      - ./consumer:/home/node/consumer
+    depends_on: 
+      - rabbitmq
+    command: >
+      bash -c "cd /home/node/consumer && npm install && npm run start"
+
+  rabbitmq:
+    image: "rabbitmq:3.8-management-alpine"
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - "./rabbitmq_data:/var/lib/rabbitmq/mnesia"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
