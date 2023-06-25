@@ -1,8 +1,19 @@
 const express = require('express');
 const amqp = require('amqplib');
 const fetch = require('node-fetch');
+const dotenv = require('dotenv')
+
+//config do dotenv -variaveis de ambiente
+dotenv.config();
+
 
 const app = express();
+
+//Banco de dados
+const connectDatabase = require("./database/db")
+
+//Conexão com o Banco de dados
+connectDatabase();
 
 const AMQP_URL = 'amqp://admin:admin@rabbitmq:5672'; // URL de conexão do RabbitMQ
 
