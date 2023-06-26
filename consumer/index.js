@@ -1,11 +1,19 @@
 const express = require('express');
 const amqp = require('amqplib');
 const fetch = require('node-fetch');
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
+const { Pool } = require('pg')
 
 //config do dotenv -variaveis de ambiente
 dotenv.config();
 
+const pool = new Pool({
+  user: 'postgres',
+  host: 'prodconsnode-db-1',
+  database: 'ProdConsDB',
+  password: 'example',
+  port: '5432',
+})
 
 const app = express();
 
@@ -33,6 +41,23 @@ app.get('/', async (req, res) => {
           if (response.ok) {
             const data = await response.json();
             console.log(data);
+
+            // Insere os dados no PostgreSQL
+            const insertQuery = `
+              INSERT INTO endereco (cep, state, city, neighborhood, street, service)
+              VALUES ($1, $2, $3, $4, $5, $6)
+            `;
+            const values = [
+              data.cep,
+              data.state,
+              data.city,
+              data.neighborhood,
+              data.street,
+              data.service
+            ];
+
+            await pool.query(insertQuery, values);
+            console.log('Dados inseridos no PostgreSQL com sucesso!');
           } else {
             console.log('Erro na requisição:', response.status);
           }
