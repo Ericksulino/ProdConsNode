@@ -2,3 +2,4 @@
 .history/
 .vscode/
 /rabbitmq_data/
+/postgres_data
